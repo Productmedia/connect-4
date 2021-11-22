@@ -15,7 +15,3 @@ what is the gameplay? place your piece on the board
 how does the player win? get 4 pieces in a row
 
 how does the player lose? if the other player wins or tie if all the spaces are gone
-
-
-
-would you like to play again? : 'y' or 'n'
