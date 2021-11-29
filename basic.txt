@@ -1,0 +1,129 @@
+You can do alot with basic programming knowledge.
+Data
+Variables
+Conditions or if statements
+Loops
+
+===============DATA=================
+What exactly is the data?
+- data can be anything from numbers, text or boolean
+
+Numbers can be intergers (whole numbers)  or float which is a decimal number
+4, 11, 8 = each of these are Interger value
+0.43, 5.5, 100.32 = float number
+
+Text other known has a string in programming, Is exactly that just a string of characters/text
+To create a string we use " " (double or single quotes) anything inside is now a string/text
+If you did "5" that is considered a string not a number value because of the double quotes.
+
+If you wanted quotes in your string you can use the other quotes. For example:
+'John said "good morning" to the teacher'
+I've used single quotes to be able to use double quotes inside the string.
+
+Boolean is either True or False in python these has to be a capital at the start
+So you can think of a light switch has either on of off, true of false
+Most of the time you'll be using boolean in if statements or while loops to check a condition.
+
+# hashtag is a comment in python, it is for the humans to read it. It gets ignored by the program
+
+Also there is another thing called array or in python called a list, the way we declare the list is by using [ ] Square brackets and a ( , ) comma to separate each value
+It's a list that is holding alot of values
+And it starts counting at 0
+[ "this", "is", "holding","alot", "of string", "values"]
+
+==============VARIABLES==============
+Variables - variables are used to store data, so we can easily refer to the variable for that data we stored in it.
+
+They are also case sensitive so
+Game = "call of duty"
+game = "candy crush"
+These are 2 different variables cause of the lower case and upper case.
+
+Think of a box and I'm storing my shoes inside that box, every time I go to that box I get my shoes.
+
+We use a single = to assign a value to a variable
+
+x = 10 # variable x has stored value of 10 (int)
+print(x) # will print 10
+my_name = "John"
+# my_name is storing string data
+print(my_name) # will print "John"
+my_age = 24
+# my_age is storing a (int) number data
+bank_balance = 45.63
+# bank_balance is storing a (float) number
+alive = True
+# alive is storing a boolean value of True
+my_list = [ "this", "is", "holding","alot", "of string", "values"]
+# my_list is storing a list of values
+print(my_list[0]) # will print "this"
+
+
+
+think of a kitchen and you know where all your plates, knifes and forks are cause its all stored neatly in each cupboard or draw. Because you allocated that space to that data/value. So it's easier to refer to that allocated space
+
+============CONDITIONS==============
+If statements are used if you wanted outcomes to a particular condition.
+
+After we state our if statement the code that needs to work for a particular condition needs to be indent to tell the program that code belongs to that condition.
+Condition also breaks down to true or false conditions
+
+Else is the other statement that goes with if statements if the conditions is not true it will run the else code instead
+
+elif  # is a 2nd if statement that will check the condition
+
+If condition:
+# don't forget the colon and indentation
+
+We use double == to compare 2 values
+
+== equal to
+<  less than
+> greater than
+>= greater than or equal to
+<= less than or equal to
+
+Examples:
+age = 17
+
+If age < 18: # if the age Is less than 18
+    print("you are not old enough to drink")
+else: # if the age is not less than 18
+    print("you are old enough")
+
+Fifa_2022 = 60
+Call_of_duty = 40
+Money = 50
+
+If money >= fifa_2020:
+    print("buying fifa")
+elif: money >= call_of_duty:
+    priny("buying call of duty")
+else:
+    print("guess it's fortnite...")
+
+===============LOOPS================
+We use loops to do repetitive task
+There is for, while loops
+
+It's the similar to if statements with the conditions and the inside it needs to be indented for the code to belong to that command
+
+For condition:
+
+While condition:
+
+We usually use for loops if we know the specific amount of times it needs to repeat it self.
+And while loops if we don't exactly know the specific amount of times it needs to repeat it self.
+
+Be careful tho because if the conditions are never met this will get your program stuck and we will get an error cause the program didn't know what to do and is stuck in the loop
+
+We usually loop over an array/list to get It's values
+
+shopping_list["eggs", "bread", "milk", "bacon"]
+
+For item in shopping_list:
+# item is a place holder for each time value in shopping list
+    print(item)
+# First loop will print "eggs" then "bread" then "milk" and finally "bacon"
+
+Knowing these basic programming knowledge is the building blocks for programs, there is alot more to this and some data has got functions in them like strings and arrays 

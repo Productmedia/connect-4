@@ -1,5 +1,5 @@
 import random # need random for the computer to make a move and to create power ups on a chance based
-
+import math
 # initialising the game board   
 board = [ # 0 is a empty space then 1 is player1 and 2 is player2
   ['0','0','0','0','0','0','0'],
@@ -10,6 +10,10 @@ board = [ # 0 is a empty space then 1 is player1 and 2 is player2
   ['0','0','0','0','0','0','0'],
  
  ]
+
+scoring = {
+  "2 in a row": 2, #
+}
 
 # initialising the players and valid spaces and power ups
 players = ['1', '2'] # what each player represents
@@ -115,37 +119,69 @@ def draw_reverse_board():
     print(board[row]) 
 
 # check if any win condition is met either horizontally, verically or diagonal, returns True or False
-def check_win_state():
+def check_win_state(player):
   """check the board if there is a win condition, returns True if no winstate returns False"""
   for row in range(len(board) - 1, -1, -1): # looping over the rows and starting from the bottom
-    print(row)
     for col in range(0, 7): # looping over the horizontal
       if board[row][col] in players: # only consider a player spaces as a winnable state.
         if col < 4: # making sure I don't go out of bounds in the column array when checking if statements  
           # we have a winning state horizontally by checking the next 3 column is all equal to each other  
-          if board[row][col] == board[row][col + 1] and board[row][col] == board[row][col + 2] and board[row][col] == board[row][col + 3]: 
+          if board[row][col] == player and board[row][col + 2] == player and board[row][col + 3] == player: 
             print("horizontal winner") # tells the players how they won
             return True
 
           # we have a right diagonal winner
-          if board[row][col] == board[row - 1][col + 1] and board[row - 1][col + 1] == board[row - 2][col + 2] and board[row- 2][col + 2] == board[row - 3][col + 3] and board[row -3][col + 3] == board[row][col]:
+          if board[row][col] == player and board[row - 1][col + 1] == player and board[row- 2][col + 2] == player and board[row -3][col + 3] == player:
             print("right diagonal winner") # tells the players how they won
-            print(col, row)
             return True; 
 
         if col > 2 and row > 2: # making sure i don't go out of bounds in the columns array
           # we have a winning state going left diagonal 
-           if board[row][col] == board[row - 1][col - 1] and board[row - 1][col - 1] == board[row - 2][col - 2] and board[row - 2][col - 2] == board[row - 3][col - 3] and board[row - 3][col - 3] == board[row][col]:
+           if board[row][col] == player and board[row - 1][col - 1] == player and board[row - 2][col - 2] == player and board[row - 3][col - 3] == player:
             print("left diagonal winner") # tells the players how they won
             return True; 
 
         # we have a winning state going vertically 
         if row > 2: # so we dont go over 
-          if board[row][col] == board[row - 1][col] and board[row - 1][col] == board[row - 2][col] and board[row - 2][col] == board[row - 3][col] and board[row - 3][col] == board[row][col]:
+          if board[row][col] == player and board[row - 1][col] == player and board[row - 2][col] == player and board[row - 3][col] == player:
             print("vertical winner") # tells the players how they won
             return True
   
   return False # if none of the conditions were met return false. No winner
+
+def score_position(board, piece):
+   
+
+#postition is the current board, the depth checks how far we are in the algo and maximizing player is checking who turn it is 
+# alpha and beta is for pruning reasons to save computer resources
+def minimax(postition, depth, maximizing_player):
+  """minimax algorithm for the ai to be a better opponent"""
+  if depth == 0: # or game over state
+    return postition
+  
+  if maximizing_player:
+    max_eval = -math.inf # assigning max_eval to negative infinity
+    for child in postition:
+      eval = minimax(child, depth - 1, False)
+      max_eval = max(max_eval, eval)
+      # alpha = max(alpha, eval)
+      # if beta <= alpha:
+      #   break
+    return max_eval
+  
+  else:
+    min_eval = math.inf
+    for child in postition:
+      eval = minimax(child, depth - 1, True)
+      min_eval = min(min_eval, eval)
+      # beta = min(beta, eval)
+      # if beta <= alpha:
+      #   break
+    return min_eval
+
+
+
+
 
 # Game starts from here
 print("\n" * 55) # clears the command screen so easier to see/read 
@@ -193,27 +229,23 @@ while playing:
     choice = valid_input(input("pick a column from 1 - 7: ")) # asks the player(s) their move
 
   move(choice, current_player)# the move was valid and placed
-  if check_win_state() == True:   # checks the win state from the new move if not continue
+  if check_win_state(current_player) == True:   # checks the win state from the new move if not continue
     playing = False # we are no longer playing. the game loop is now finished
+    print("\n" * 45)
+    draw_board()
+    check_win_state(current_player) # prints how they won
+    print(f"\ncongratulations to player {current_player} for winning the game")
   else:
     turn += 1
     switch_player = -switch_player #if the new move was not the winning move then switch player
   
   #checks if the game board is filled and no more spaces available
   for avaiable_space in valid_space:
-    print(avaiable_space)
     if avaiable_space in board[0]: # only has to check the top row if there is any valid spaces
       break # there is still space on the board so continue
-    else:
+    else: # its a tie
       playing = False
+      print("\n" * 45)
+      draw_board()
+      print("It's a tie!")
       break # its a tie 
-
-if check_win_state() == True: # final check the game conditions
-  print("\n" * 45)
-  draw_board()
-  check_win_state() # prints how they won
-  print(f"\ncongratulations to player {current_player} for winning the game")
-else: # there is no winner and the board is filled up. It's a tie 
-  print("\n" * 45)
-  draw_board()
-  print("It's a tie!")
