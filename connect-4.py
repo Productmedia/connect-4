@@ -27,13 +27,13 @@ turn = 0 # counts the turns
 playing = True #stating that we are playing the game for the main game loop
 
 #clears the whole input column back to empty spaces
-def clear_column(column):
+def clear_column(column, board):
   """clears a whole column"""
   for row in range(0, len(board)): # goes through each row
     board[row][column] = '0' # at each row and the column assign makes each value back to 0
 
 # places and decides the power up on the board
-def create_power_up():
+def create_power_up(board):
   """creates and places the power up on the board"""
   power_up = random.randint(1, 2) # deciding what power up should it be 
   col = random.randint(0, len(board[0]) - 1) # get a random column
@@ -43,7 +43,7 @@ def create_power_up():
       break # breaks out of the loop
   
 # checks if a move is valid, returns true if the move is valid else returns false
-def valid_move(choice):
+def valid_move(choice, board):
   """checks if a move is valid. returns either true or false"""
   for row in range(len(board) - 1, -1, -1): # starting from the bottom of the board, if the bottom of the board is taken go to the next level 
     if board[row][choice] in valid_space: # if the current board choice is valid
@@ -51,8 +51,17 @@ def valid_move(choice):
     if row == 0: # reached the top
       return False # return false if there is no space availabe
 
+def undo_move(board, choice, player):
+  """given (int)choice which is the row position and player(which player) will be placed on the board"""
+  # starting from the bottom of the board. if the board place has been taken then check the next one above
+  for row in range(0, len(board)):
+    if board[row][choice] == player: # if the current board choice is in valid space
+      board[row][choice] = "0" # replacing the space for the player piece 
+      break
+
+
 # checking if the user input is valid, if not keep looping over until desired input is done, also handles valid_move()
-def valid_input(input_string):
+def valid_input(input_string, board):
   """checks if the user input is valid, if not keep looping over until desired input is done"""
   not_valid = True # easier to read and understand the while loop
   while not_valid:
@@ -65,7 +74,7 @@ def valid_input(input_string):
         input_string = input("pick a column from 1 - 7: ") # asking user for a new input
         continue # loops back with the new input that has been stored in the input_string
 
-      elif valid_move(number) == False: # if the move is not valid 
+      elif valid_move(number, board) == False: # if the move is not valid 
         print("invalid space")
         input_string = input("pick a column from 1 - 7: ") # asking user for a new input
         continue
@@ -79,7 +88,7 @@ def valid_input(input_string):
 
 # user gives input and then will have to check if a piece is already there, then go higher <- loop till space
 # handles colliding with power ups
-def move(choice, player):
+def move(board, choice, player):
   """given (int)choice which is the row position and player(which player) will be placed on the board"""
   # starting from the bottom of the board. if the board place has been taken then check the next one above
   for row in range(len(board) - 1, -1, -1):
@@ -98,102 +107,157 @@ def move(choice, player):
       break
 
 #prints the options to the screen easier for player to see their options and what number is the column
-def draw_options():
+def draw_options(board):
   for column in range(1, len(board[0]) + 1): #counts from 1 and goes up to the length of the board column 
     print(f"  {column}  ", end = "")
   print("") # seperates the options to the board.
 
 # draws the board in a 2d grid easier for player to see the game
-def draw_board():
+def draw_board(board):
   """prints the board to the console"""
-  draw_options() # calls the draw options for the player
+  draw_options(board) # calls the draw options for the player
 
   for row in board: 
     print(row) #gets each row from the board and prints it, presenting a 2d board
 
 #draws the upside down board, confusing the players 
-def draw_reverse_board():
+def draw_reverse_board(board):
   """prints the upside down to the console"""
   draw_options() # calls the draw options for the player    
   for row in range(len(board) - 1, -1, -1): # reverses the print statement of how to draw the board so it is now upside down to the player 
     print(board[row]) 
 
 # check if any win condition is met either horizontally, verically or diagonal, returns True or False
-def check_win_state(player):
+def check_win_state(board):
   """check the board if there is a win condition, returns True if no winstate returns False"""
   for row in range(len(board) - 1, -1, -1): # looping over the rows and starting from the bottom
     for col in range(0, 7): # looping over the horizontal
       if board[row][col] in players: # only consider a player spaces as a winnable state.
         if col < 4: # making sure I don't go out of bounds in the column array when checking if statements  
           # we have a winning state horizontally by checking the next 3 column is all equal to each other  
-          if board[row][col] == player and board[row][col + 2] == player and board[row][col + 3] == player: 
+          if board[row][col] == board[row][col + 1] == board[row][col + 2] == board[row][col + 3]: 
             print("horizontal winner") # tells the players how they won
             return True
 
           # we have a right diagonal winner
-          if board[row][col] == player and board[row - 1][col + 1] == player and board[row- 2][col + 2] == player and board[row -3][col + 3] == player:
+          if board[row][col] == board[row - 1][col + 1] == board[row- 2][col + 2] ==  board[row -3][col + 3]:
             print("right diagonal winner") # tells the players how they won
             return True; 
 
         if col > 2 and row > 2: # making sure i don't go out of bounds in the columns array
           # we have a winning state going left diagonal 
-           if board[row][col] == player and board[row - 1][col - 1] == player and board[row - 2][col - 2] == player and board[row - 3][col - 3] == player:
+           if board[row][col] == board[row - 1][col - 1] == board[row - 2][col - 2] == board[row - 3][col - 3]:
             print("left diagonal winner") # tells the players how they won
             return True; 
 
         # we have a winning state going vertically 
         if row > 2: # so we dont go over 
-          if board[row][col] == player and board[row - 1][col] == player and board[row - 2][col] == player and board[row - 3][col] == player:
+          if board[row][col] == board[row - 1][col] == board[row - 2][col] == board[row - 3][col]:
             print("vertical winner") # tells the players how they won
             return True
   
   return False # if none of the conditions were met return false. No winner
 
-def score_position(board, piece):
-   
 
-#postition is the current board, the depth checks how far we are in the algo and maximizing player is checking who turn it is 
-# alpha and beta is for pruning reasons to save computer resources
-def minimax(postition, depth, maximizing_player):
-  """minimax algorithm for the ai to be a better opponent"""
-  if depth == 0: # or game over state
-    return postition
+def check_winning_player(board):
+  """check the board if there is a winning player, returns the value of the winning player else returns False"""
+  for row in range(len(board) - 1, -1, -1): # looping over the rows and starting from the bottom
+    for col in range(0, 7): # looping over the horizontal
+      # we have a winning state going vertically 
+      if board[row][col] in players: # only consider a player spaces as a winnable state.
+        if col < 4: # making sure I don't go out of bounds in the column array when checking if statements  
+          # we have a winning state horizontally by checking the next 3 column is all equal to each other  
+          if board[row][col] == board[row][col + 1] == board[row][col + 2] == board[row][col + 3]: 
+            return board[row][col]
+          
+          # we have a right diagonal winner
+          if board[row][col] == board[row - 1][col + 1] == board[row- 2][col + 2] ==  board[row -3][col + 3]:
+            return board[row][col]
+
+        if col > 2 and row > 2: # making sure i don't go out of bounds in the columns array
+          # we have a winning state going left diagonal 
+           if board[row][col] == board[row - 1][col - 1] == board[row - 2][ col - 2]:
+            return board[row][col]
+
+        if row > 2: # so we dont go over 
+          if board[row][col] == board[row - 1][col] == board[row -2][col] == board[row - 3][col]:
+            return board[row][col]
+
+      
+  
+  return "none" # if none of the conditions were met return false. No winner
+
+
+scores = {
+"1": -5,
+"2": 5,
+"none": 0
+}
+
+def minimax(board, depth, maximizing_player):
+  # draw_board(board)
+  result = check_winning_player(board)
+  # print(result)
+  if depth == 0 or result != "none":
+    score = scores[result]
+    return score
   
   if maximizing_player:
-    max_eval = -math.inf # assigning max_eval to negative infinity
-    for child in postition:
-      eval = minimax(child, depth - 1, False)
-      max_eval = max(max_eval, eval)
-      # alpha = max(alpha, eval)
-      # if beta <= alpha:
-      #   break
-    return max_eval
+    best_score = -math.inf  
+    for col in range(0, len(board[0])):
+      if valid_move(col, board) == True: # if the spot is available
+        move(board, col, player_2)# places the ai in the first spot 
+        score = minimax(board, depth - 1, False) # checks the score by going deeper 
+        undo_move(board, col, player_2) # removes the player from that spot 
+        best_score = max(score, best_score)
   
+    return best_score
+
   else:
-    min_eval = math.inf
-    for child in postition:
-      eval = minimax(child, depth - 1, True)
-      min_eval = min(min_eval, eval)
-      # beta = min(beta, eval)
-      # if beta <= alpha:
-      #   break
-    return min_eval
+    best_score = math.inf
+    for col in range(0, len(board[0])):
+      if valid_move(col, board) == True:
+        move(board, col, player_1)
+        score = minimax(board, depth - 1, True)
+        undo_move(board, col, player_1)
+        best_score = min(score, best_score)
+    return best_score
+
+    
 
 
 
 
+def best_move():
+  #  ai takes its turn
+  best_score = -math.inf
+  coords = {}
+  score = -math.inf
+  for col in range(0, len(board[0])):
+    print("working on it...")
+    if valid_move(col, board) == True: # if the spot is available
+      move(board, col, player_2)# places the ai in the first spot 
+      score = minimax(board, 6, False) # checks the score by going deeper 
+      undo_move(board, col, player_2) # removes the player from that spot 
+    
+
+    if score > best_score:
+      best_score = score
+      coords["col"] = col
+  return coords["col"]
 
 # Game starts from here
 print("\n" * 55) # clears the command screen so easier to see/read 
 print("WELCOME TO CONNECT 4") # introduction and game title
-print("connect four of your pieces to win! either horizontally, vertially or diagonally.") # instructions on how to win
-print("Oh by the way, this game has power ups that can be collected.") # informing the player, that there is power ups in the game
+# print("connect four of your pieces to win! either horizontally, vertially or diagonally.") # instructions on how to win
+# print("Oh by the way, this game has power ups that can be collected.") # informing the player, that there is power ups in the game
 
-is_computer_playing = input("Do you want to play with the computer? 'y' or 'n': ") # if we are playing with the computer or another person
-if is_computer_playing.lower() == "y":
-  computer = True # the computer is playing 
-else:
-  computer = False # the computer is not playing
+# is_computer_playing = input("Do you want to play with the computer? 'y' or 'n': ") # if we are playing with the computer or another person
+# if is_computer_playing.lower() == "y":
+#   computer = True # the computer is playing 
+# else:
+#   computer = False # the computer is not playing
+computer = True
 
 # main game loop 
 while playing:
@@ -212,28 +276,27 @@ while playing:
  
   # draws the board either normal or upside down
   if upside_down and turn <= 6: # if this power up is True and the turn amount is less than 6  
-    draw_reverse_board() # draws the board upside down
+    draw_reverse_board(board) # draws the board upside down
   else:
-    draw_board() # draws the board for the player to see the game 
+    draw_board(board) # draws the board for the player to see the game 
   
   # handles the user and computer input and checks if the move was valid
   # if the computer = true and player = player2 then let the computer decide a number 
   if computer and current_player == '2': # getting a computer to pick a random number between 1 - 7
-    choice = random.randint(0, 6) # picks a random column for the computer turn
-    while valid_move(choice) == False: # validating the computers turn if it returns false make the computer pick another number until valid
-      choice = random.randint(0, 6) # picks a new number 
-      valid_move(choice) # checks if that number is valid
-      
+    choice = best_move() # picks a random column for the computer turn
+    # while valid_move(choice, board) == False: # validating the computers turn if it returns false make the computer pick another number until valid
+    #   choice = random.randint(0, 6) # picks a new number 
+    #   valid_move(choice, board) # checks if that number is valid     
   else:
      # get user input from a range from 1 - 7
-    choice = valid_input(input("pick a column from 1 - 7: ")) # asks the player(s) their move
+    choice = valid_input(input("pick a column from 1 - 7: "), board) # asks the player(s) their move
 
-  move(choice, current_player)# the move was valid and placed
-  if check_win_state(current_player) == True:   # checks the win state from the new move if not continue
+  move(board, choice, current_player)# the move was valid and placed
+  if check_win_state(board) == True:   # checks the win state from the new move if not continue
     playing = False # we are no longer playing. the game loop is now finished
     print("\n" * 45)
-    draw_board()
-    check_win_state(current_player) # prints how they won
+    draw_board(board)
+    check_win_state(board) # prints how they won
     print(f"\ncongratulations to player {current_player} for winning the game")
   else:
     turn += 1
@@ -246,6 +309,6 @@ while playing:
     else: # its a tie
       playing = False
       print("\n" * 45)
-      draw_board()
+      draw_board(board)
       print("It's a tie!")
       break # its a tie 
