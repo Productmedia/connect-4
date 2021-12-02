@@ -1,5 +1,5 @@
-import random # need random for the computer to make a move and to create power ups on a chance based
-import math
+import random # need random to create power ups on a chance based
+import math # need to use for the computer to decide on what move is the best move
 # initialising the game board   
 board = [ # 0 is a empty space then 1 is player1 and 2 is player2
   ['0','0','0','0','0','0','0'],
@@ -8,23 +8,24 @@ board = [ # 0 is a empty space then 1 is player1 and 2 is player2
   ['0','0','0','0','0','0','0'],
   ['0','0','0','0','0','0','0'],
   ['0','0','0','0','0','0','0'],
- 
  ]
-
-scoring = {
-  "2 in a row": 2, #
-}
 
 # initialising the players and valid spaces and power ups
 players = ['1', '2'] # what each player represents
 valid_space = ['0','%','X'] # valid spaces for the player to choose from 
 player_1 = players[0] # what represents player 1 move 
 player_2 = players[1] # what represents player 2 move 
-
 switch_player = 1 # deciding which player is current playing. value of 1 for player1 or -1 for player2
 upside_down = False # power up that will draw the board upside down confusing the players 
-turn = 0 # counts the turns
+turn = 0 # counts the turns for the power ups
 playing = True #stating that we are playing the game for the main game loop
+
+# defines the scoring for the minimax algorithm to decide what is a good move for the computer 
+scores = {
+  "1": -10, # if player 1 wins the game the ai gets a 
+  "2": 5, # if player 2 wins give the ai higher points
+  "none": 0 # if none player wins give a score that is not negative or postive
+}
 
 #clears the whole input column back to empty spaces
 def clear_column(column, board):
@@ -50,15 +51,6 @@ def valid_move(choice, board):
       return True # move is valid return true
     if row == 0: # reached the top
       return False # return false if there is no space availabe
-
-def undo_move(board, choice, player):
-  """given (int)choice which is the row position and player(which player) will be placed on the board"""
-  # starting from the bottom of the board. if the board place has been taken then check the next one above
-  for row in range(0, len(board)):
-    if board[row][choice] == player: # if the current board choice is in valid space
-      board[row][choice] = "0" # replacing the space for the player piece 
-      break
-
 
 # checking if the user input is valid, if not keep looping over until desired input is done, also handles valid_move()
 def valid_input(input_string, board):
@@ -89,7 +81,7 @@ def valid_input(input_string, board):
 # user gives input and then will have to check if a piece is already there, then go higher <- loop till space
 # handles colliding with power ups
 def move(board, choice, player):
-  """given (int)choice which is the row position and player(which player) will be placed on the board"""
+  """given (int)choice which is the column position and player(which player) will be placed on the board"""
   # starting from the bottom of the board. if the board place has been taken then check the next one above
   for row in range(len(board) - 1, -1, -1):
     if board[row][choice] in valid_space: # if the current board choice is in valid space
@@ -101,9 +93,18 @@ def move(board, choice, player):
      
       elif board[row][choice] == valid_space[2]: # picked up power 3
         col = random.randint(0, len(board[0]) -1)
-        clear_column(col)
+        clear_column(col, board)
 
       board[row][choice] = player # replacing the space for the player piece 
+      break
+
+# undo a move depending if the top player is the player given
+def undo_move(board, choice, player): 
+  """given (int)choice which is the column position and player(which player) will be removed from the board only if its the top piece on the column"""
+  # starting from the bottom of the board. if the board place has been taken then check the next one above
+  for row in range(0, len(board)): # loops through the array
+    if board[row][choice] == player: # if the current board choice is in valid space
+      board[row][choice] = "0" # replacing the space for the player piece 
       break
 
 #prints the options to the screen easier for player to see their options and what number is the column
@@ -123,7 +124,7 @@ def draw_board(board):
 #draws the upside down board, confusing the players 
 def draw_reverse_board(board):
   """prints the upside down to the console"""
-  draw_options() # calls the draw options for the player    
+  draw_options(board) # calls the draw options for the player    
   for row in range(len(board) - 1, -1, -1): # reverses the print statement of how to draw the board so it is now upside down to the player 
     print(board[row]) 
 
@@ -158,7 +159,7 @@ def check_win_state(board):
   
   return False # if none of the conditions were met return false. No winner
 
-
+#checks and returns the player who has won, it is used for the ai algrithem to go along with the scoring 
 def check_winning_player(board):
   """check the board if there is a winning player, returns the value of the winning player else returns False"""
   for row in range(len(board) - 1, -1, -1): # looping over the rows and starting from the bottom
@@ -187,92 +188,82 @@ def check_winning_player(board):
   
   return "none" # if none of the conditions were met return false. No winner
 
-
-scores = {
-"1": -5,
-"2": 5,
-"none": 0
-}
-
+# recusion function that takes in the board and counts the depth and determines who is the maximizing player 
+# is used for the computer decision and uses creates future boards to determine the score 
 def minimax(board, depth, maximizing_player):
-  # draw_board(board)
-  result = check_winning_player(board)
-  # print(result)
-  if depth == 0 or result != "none":
-    score = scores[result]
-    return score
+  """returns a score value, depth determines how far forward to work from"""
+  result = check_winning_player(board) # results on who is winning the game to determine the score 
+  if depth == 0 or result != "none": # when the depth has hit 0 it will return a score or when the result not none
+    score = scores[result] # puts the winning player 
+    return score # returds 
   
-  if maximizing_player:
-    best_score = -math.inf  
-    for col in range(0, len(board[0])):
+  if maximizing_player: # if its the maximizing turn 
+    best_score = -math.inf  # setting the best score to be -infinity 
+    for col in range(0, len(board[0])): # loops through the column
       if valid_move(col, board) == True: # if the spot is available
         move(board, col, player_2)# places the ai in the first spot 
-        score = minimax(board, depth - 1, False) # checks the score by going deeper 
+        score = minimax(board, depth - 1, False) # checks the score by going further predicting game states
         undo_move(board, col, player_2) # removes the player from that spot 
-        best_score = max(score, best_score)
-  
-    return best_score
+        best_score = max(score, best_score) # compares the new score to the old best_score and chooses the higher score
+    return best_score # returns the best score that it has calculated
 
-  else:
-    best_score = math.inf
-    for col in range(0, len(board[0])):
-      if valid_move(col, board) == True:
-        move(board, col, player_1)
-        score = minimax(board, depth - 1, True)
-        undo_move(board, col, player_1)
-        best_score = min(score, best_score)
-    return best_score
+  else: # its not the maximizing player so going to make the best move for the player so lower score for the ai 
+    best_score = math.inf # sets the score to the + infinity 
+    for col in range(0, len(board[0])): # loops through the columns to choose from
+      if valid_move(col, board) == True: # if the move is valid
+        move(board, col, player_1) # places the player piece to 
+        score = minimax(board, depth - 1, True) # checks the score by going further predicting game states
+        undo_move(board, col, player_1) # removes the player piece from the board so it loops to the next column position 
+        best_score = min(score, best_score) # compares the new score to the old best score and chooses the lower score 
+    return best_score # returns the best score that it has calculated
 
-    
-
-
-
-
+# best move for the computer to decide on
 def best_move():
+  """returns a column to choose from. Uses the minimax algorithm to determine where to go"""
   #  ai takes its turn
-  best_score = -math.inf
-  coords = {}
-  score = -math.inf
-  for col in range(0, len(board[0])):
-    print("working on it...")
+  best_score = -math.inf # best score is set to -infinity 
+  coords = {} # creates the coords to return to the player
+  score = -math.inf # score has to be defined and is set to -infinity 
+
+  for col in range(0, len(board[0])): # loops through the columns
+    print("working on it...") # tells the player that the ai is working on a move to make
     if valid_move(col, board) == True: # if the spot is available
       move(board, col, player_2)# places the ai in the first spot 
       score = minimax(board, 6, False) # checks the score by going deeper 
       undo_move(board, col, player_2) # removes the player from that spot 
-    
 
-    if score > best_score:
-      best_score = score
-      coords["col"] = col
-  return coords["col"]
+    if score > best_score: # when the score is greater than the best score replace it
+      best_score = score # replacing the best score to score value
+      coords["col"] = col # storing the column value to the coords with a key of "col"
+  return coords["col"] # returns the value of column postion 
 
 # Game starts from here
 print("\n" * 55) # clears the command screen so easier to see/read 
 print("WELCOME TO CONNECT 4") # introduction and game title
-# print("connect four of your pieces to win! either horizontally, vertially or diagonally.") # instructions on how to win
-# print("Oh by the way, this game has power ups that can be collected.") # informing the player, that there is power ups in the game
+print("connect four of your pieces to win! either horizontally, vertially or diagonally.") # instructions on how to win
+print("Oh by the way, this game has power ups that can be collected.") # informing the player, that there is power ups in the game
 
-# is_computer_playing = input("Do you want to play with the computer? 'y' or 'n': ") # if we are playing with the computer or another person
-# if is_computer_playing.lower() == "y":
-#   computer = True # the computer is playing 
-# else:
-#   computer = False # the computer is not playing
-computer = True
+is_computer_playing = input("Do you want to play with the computer? 'y' or 'n': ") # if we are playing with the computer or another person
+if is_computer_playing.lower() == "y":
+  computer = True # the computer is playing 
+else:
+  computer = False # the computer is not playing
 
 # main game loop 
 while playing:
   print("\n" * 55) # clears the command screen so easier to see/read
   # which player is currently taking their turn and stores it in current_player
   if switch_player == 1:  
-    current_player = player_1 
+    current_player = player_1 # sets the current player to player 1
     print("PLAYER 1's TURN") # stating who's turn it is on the screen
   else: 
-    current_player = player_2
+    current_player = player_2 # sets the current player to player 1
     print("PLAYER 2's TURN")
 
+  # creates and places a power up on the board
   chance = random.random() # creates a floating number between 0 - 1
-  # if  chance < 0.20 and turn > 3: # only create the power ups on a chance below 20% and turn is higher than 3
-    # create_power_up() # creates and places the power up on the board for the player to land on
+  if  chance < 0.15 and turn > 4: # only create the power ups on a chance below 20% and turn is higher than 3
+    create_power_up(board) # creates and places the power up on the board for the player to land on
  
   # draws the board either normal or upside down
   if upside_down and turn <= 6: # if this power up is True and the turn amount is less than 6  
@@ -283,13 +274,10 @@ while playing:
   # handles the user and computer input and checks if the move was valid
   # if the computer = true and player = player2 then let the computer decide a number 
   if computer and current_player == '2': # getting a computer to pick a random number between 1 - 7
-    choice = best_move() # picks a random column for the computer turn
-    # while valid_move(choice, board) == False: # validating the computers turn if it returns false make the computer pick another number until valid
-    #   choice = random.randint(0, 6) # picks a new number 
-    #   valid_move(choice, board) # checks if that number is valid     
+    choice = best_move() # chooses the best move for the computer to go 
   else:
      # get user input from a range from 1 - 7
-    choice = valid_input(input("pick a column from 1 - 7: "), board) # asks the player(s) their move
+    choice = valid_input(input("pick a column from 1 - 7: "), board) # asks the player(s) their move. checks valid input and handles it
 
   move(board, choice, current_player)# the move was valid and placed
   if check_win_state(board) == True:   # checks the win state from the new move if not continue
@@ -311,4 +299,4 @@ while playing:
       print("\n" * 45)
       draw_board(board)
       print("It's a tie!")
-      break # its a tie 
+      break # break out the loop
