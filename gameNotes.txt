@@ -29,3 +29,19 @@ after picking upside down power up change it back after 4 turns
 clear column instantly happens, it is randomly chosen
 
 shift clears a column far side and move all the values either left or right 
+
+
+how do we implement the minimax algo for the computer opponent
+
+ 
+
+assign a scoring system for a potientual moves 
+
+2 in a row, gets a score
+3 in a row gets + more score
+4 in a row is the max score you can get
+
+but if the enemy 
+gets 2 in a row: -2
+gets 3 in a row: -4
+gets 4 in a row: -100
