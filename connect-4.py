@@ -19,13 +19,13 @@ switch_player = 1 # deciding which player is current playing. value of 1 for pla
 upside_down = False # power up that will draw the board upside down confusing the players 
 clear_a_column = False # active the power up to clear a column
 turn = 0 # counts the turns for the power ups
-playing = True #stating that we are playing the game for the main game loop
-pieces = []
+playing = True # stating that we are playing the game for the main game loop
+pieces = [] # stores removed pieces from the board  
 
 # defines the scoring for the minimax algorithm to decide what is a good move for the computer 
 scores = {
-  "1": -10, # if player 1 wins the game the ai gets a 
-  "2": 5, # if player 2 wins give the ai higher points
+  "1": -20, # if player 1 wins the game the computer gets a negative score 
+  "2": 10, # if player 2 wins give the computer a postive score
   "none": 0 # if none player wins give a score that is not negative or postive
 }
 
@@ -145,76 +145,75 @@ def draw_board(board):
   """prints the board to the console"""
   draw_options(board) # calls the draw options for the player
   for row in board: # loops through the board rows 
-    print("|" ,end="") # places a wall next to the edge of the beginning of each row
+    print("|" ,end="") # draws a vertical line at left edge of board, for each row
     for column in row: # loops through each value in the current row index
       print(" ", column, end= "") # gives some space and draws the value in the column position
-    print("  |") # places a wall next to the right edge game board
+    print("  |") # draws a vertical line at the right edge of the board, for each row
 
     print("| " ,end="") # places a wall to the left of the board
-    for column in range(0, 10): # looping through the amount of columns + a bit more
-      print(" -", end= "") # draw a dash under each column  
-    print("  |") # at the end draw a right edge border for the board
+    for column in range(0, 10): # draws 10 dashes between each row
+      print(" -", end= "") # draw a dash roughly under each column  
+    print("  |") # draws a vertical line at the right edge of the board, for each row
    
 #draws the upside down board, confusing the players 
 def draw_reverse_board(board):
   """prints the upside down to the console"""
   draw_options(board) # calls the draw options for the player    
   for row in range(len(board) - 1, 0, -1): # reverses the print statement of how to draw the board so it is now upside down to the player 
-    print("|" ,end="") # drawing a horizontal line for the edge of board 
+    print("|" ,end="") # draws a vertical line at left edge of board, for each row
     for column in board[row]: # loops through each column in the current row 
       print(" ", column, end= "") # gives space between each column value
-    print("s  |") # draws a horizontal line for the right edge of the board
+    print("  |") # draws a vertical line at the right edge of the board, for each row
 
-    print("| " ,end="") # presints 
-    for column in range(0, 10):
-      print(" -", end= "")
-    
-    print("  |")
+    print("| " ,end="") # draws a vertical line at left edge of board, for each row
+    for column in range(0, 10): # draws 10 dashes between each row
+      print(" -", end= "") # draw a dash roughly under each column  
+    print("  |") # draws a vertical line at the right edge of the board, for each row
       
-# check if any win condition is met either horizontally, verically or diagonal, returns True or False
+# check if a win condition is met either horizontally, verically or diagonal, returns a string character or boolean value
 def check_win_state(board, want_character):
-  """check the board if there is a win condition, returns True if no winstate returns False"""
+  """check the board if there is a win condition. either returns the winning character or True. If no winstate returns False/'none' """
   for row in range(len(board) - 1, -1, -1): # looping over the rows and starting from the bottom
     for col in range(0, 7): # looping over the horizontal
       if board[row][col] in players: # only consider a player spaces as a winnable state.
         if col < 4: # making sure I don't go out of bounds in the column array when checking if statements  
           # we have a winning state horizontally by checking the next 3 column is all equal to each other  
           if board[row][col] == board[row][col + 1] == board[row][col + 2] == board[row][col + 3]: 
-            if want_character:
-              return board[row][col]
-            else:
+            if want_character: # if we want the winning string character
+              return board[row][col] # returns the winning string character
+            else: # we dont want the character so we want the boolean value
               print("horizontal winner") # tells the players how they won
-              return True
+              return True 
 
-          # we have a right diagonal winner
+          # making sure we don't wrap around the board and we have a right diagonal winner.
           if row > 2 and board[row][col] == board[row - 1][col + 1] == board[row- 2][col + 2] ==  board[row -3][col + 3]:
-            if want_character:
-              return board[row][col]
-            else:
+            if want_character:  # if we want the winning string character
+              return board[row][col] # returns the winning string character
+            else: # we dont want the character so we want the boolean value
               print("right diagonal winner") # tells the players how they won
               return True; 
 
         if col > 2 and row > 2: # making sure i don't go out of bounds in the columns array
           # we have a winning state going left diagonal 
            if board[row][col] == board[row - 1][col - 1] == board[row - 2][col - 2] == board[row - 3][col - 3]:
-            if want_character == True:
-              return board[row][col]
-            else:
+            if want_character: # if we want the winning string character
+              return board[row][col] # if we want the winning string character
+            else: # we dont want the character so we want the boolean value
               print("left diagonal winner") # tells the players how they won
               return True; 
 
         # we have a winning state going vertically 
         if row > 2 and board[row][col] == board[row - 1][col] == board[row - 2][col] == board[row - 3][col]:
-          if want_character == True:
-            return board[row][col]
-          else:
+          if want_character: # if we want the winning string character
+            return board[row][col] # returns the winning string character
+          else: # we dont want the character so we want the boolean value
             print("vertical winner") # tells the players how they won
             return True; 
  
- # if none of the above were True give a final return base on what output I want from the function
-  if want_character:
-    return "none"
-  else:
+  # if none of the above were True give a final return which is false or none
+  if want_character: # if we want the winning string character
+    return "none" # tells that there was no winner
+  else: # we want a boolean character
     return False # if none of the conditions were met return false. No winner
 
 # recusion function that takes in the board and counts the depth and determines who is the maximizing player 
@@ -223,7 +222,7 @@ def minimax(board, depth, maximizing_player):
   """returns a score value, depth determines how far forward to work from"""
   result = check_win_state(board, True) # results on who is winning the game to determine the score 
   if depth == 0 or result != "none": # when the depth has hit 0 it will return a score or when the result not none
-    score = scores[result] # puts the winning player 
+    score = scores[result] # checks the result winning character and puts into the scores dictonary and determines the score
     return score # returns score 
   
   if maximizing_player: # if its the maximizing turn 
@@ -246,100 +245,94 @@ def minimax(board, depth, maximizing_player):
         best_score = min(score, best_score) # compares the new score to the old best score and chooses the lower score 
     return best_score # returns the best score that it has calculated
 
-# best move for the computer to decide on
+# best move for the computer to make
 def best_move(board):
   """returns a column to choose from. Uses the minimax algorithm to determine where to go"""
-  #  ai takes its turn
   best_score = -math.inf # best score is set to -infinity 
   coords = {} # creates the coords to return to the player
   score = -math.inf # score has to be defined and is set to -infinity 
 
-  fake_board = board
-
-  for col in range(0, len(fake_board[0])): # loops through the columns
+  for column in range(0, len(board[0])): # loops through the columns
     print("working on it...") # tells the player that the ai is working on a move to make
-    if valid_move(col, board) == True: # if the spot is available
-      move(fake_board, col, player_2, False)# places the ai in the first spot 
-      # print(pieces)
-      score = minimax(board, 3, False) # checks the score by going deeper 
-      undo_move(fake_board, col, player_2) # removes the player from that spot 
-      # print(pieces)
+    if valid_move(column, board) == True: # if the spot is available
+      move(board, column, player_2, False)# places the ai in the first spot 
+      score = minimax(board, 4, False) # checks the score by going deeper 
+      undo_move(board, column, player_2) # removes the player from that spot 
+
     if score > best_score: # when the score is greater than the best score replace it
       best_score = score # replacing the best score to score value
-      coords["col"] = col # storing the column value to the coords with a key of "col"
+      coords["col"] = column # storing the column value to the coords with a key of "col"
   return coords["col"] # returns the value of column postion 
 
 # Game starts from here
-# print("\n" * 55) # clears the command screen so easier to see/read 
-# print("WELCOME TO CONNECT 4") # introduction and game title
-# print("connect four of your pieces to win! either horizontally, vertially or diagonally.") # instructions on how to win
-# print("Oh by the way, this game has power ups that can be collected.") # informing the player, that there is power ups in the game
+print("\n" * 55) # clears the command screen so easier to see/read 
+print("WELCOME TO CONNECT 4") # introduction and game title
+print("connect four of your pieces to win! either horizontally, vertially or diagonally.") # instructions on how to win
+print("Oh by the way, this game has power ups that can be collected.") # informing the player, that there is power ups in the game
 
-# is_computer_playing = input("Do you want to play with the computer? 'y' or 'n': ") # if we are playing with the computer or another person
-# if is_computer_playing.lower() == "y":
-#   computer = True # the computer is playing 
-# else:
-#   computer = False # the computer is not playing
+is_computer_playing = input("Do you want to play with the computer? 'y' or 'n': ") # if we are playing with the computer or another person
+if is_computer_playing.lower() == "y":
+  computer = True # the computer is playing 
+else: # the computer is not playing
+  computer = False # the computer is not playing
 
-computer = True
-# playing = False
-# main game loop 
-while playing:
+
+while playing: # main game loop 
   print("\n" * 55) # clears the command screen so easier to see/read
-  
   print("CONNECT 4") # presenting the game title 
   print("=========") # underlining the game title
   # which player is currently taking their turn and stores it in current_player
-  if switch_player == 1:  
+  if switch_player == 1:  # if switch_player equal to 1
     current_player = player_1 # sets the current player to player 1
     print("PLAYER 1's TURN") # stating who's turn it is on the screen
-  else: 
+  else: # if switch_player equal to -1
     current_player = player_2 # sets the current player to player 1
-    print("PLAYER 2's TURN")
+    print("PLAYER 2's TURN") # stating who's turn it is on the screen
   print("---------------") # uderlining whos currently playing
 
   # creates and places a power up on the board
   chance = random.random() # creates a floating number between 0 - 1
-  if  chance < 0.15 and turn > 3: # only create the power ups on a chance below 20% and turn is higher than 3
+  if chance < 0.16 and turn > 3: # only create the power ups on a chance below 20% and turn is higher than 3
     create_power_up(board) # creates and places the power up on the board for the player to land on
  
   # draws the board either normal or upside down
   if upside_down and turn <= 6: # if this power up is True and the turn amount is less than 6 
     draw_reverse_board(board) # draws the board upside down
-  else:
+  else: # draws the board normally 
     draw_board(board) # draws the board for the player to see the game 
   
   # handles the user and computer input and checks if the move was valid
   # if the computer = true and player = player2 then let the computer decide a number 
   if computer and current_player == '2': # getting a computer to pick a random number between 1 - 7
     choice = best_move(board) # chooses the best move for the computer to go 
-  else:
+  else: # get player(s) to give input
      # get user input from a range from 1 - 7
-    choice = valid_input(input("pick a column from 1 - 7: "), board) # asks the player(s) their move. checks valid input and handles it
+     # asks the player(s) their move. checks valid input and handles it
+    choice = valid_input(input("pick a column from 1 - 7: "), board)
 
   move(board, choice, current_player, True)# the move was valid and placed
-  if check_win_state(board, False) == True:   # checks the win state from the new move if not continue
-    playing = False # we are no longer playing. the game loop is now finished
-    print("\n" * 45)
-    draw_board(board)
+  if check_win_state(board, False) == True: # checks the win state from the new move if not continue
+    playing = False # we are no longer playing. the main game loop is now finished
+    print("\n" * 45) # gives a clean screen 
+    draw_board(board) # draws the final board
     check_win_state(board, False) # prints how they won
-    print(f"\ncongratulations to player {current_player} for winning the game")
-  else:
-    turn += 1
-    switch_player = -switch_player #if the new move was not the winning move then switch player
+    print(f"\ncongratulations to player {current_player} for winning the game") # congrats the player for winning the game
+  else: # the new move was not the winning move so continuing the game and swich players
+    turn += 1 # increases the turn counter
+    switch_player = -switch_player # switches player
   
-  if clear_a_column == True:
-    col = random.randint(0, len(board[0]) -1)
-    clear_column(col, board)
-    clear_a_column = False
+  if clear_a_column == True: # if the clear a column power up was activatedd
+    column = random.randint(0, len(board[0]) -1) # selects a random column
+    clear_column(column, board) # clears the random column chosesn
+    clear_a_column = False # set the trigger back to false
 
   #checks if the game board is filled and no more spaces available
-  for avaiable_space in valid_space:
-    if avaiable_space in board[0]: # only has to check the top row if there is any valid spaces
+  for avaiable_space in valid_space: # checks if any of the valid space is available in the game still
+    if avaiable_space in board[0]: # only has to check the top row if there is any available spaces
       break # there is still space on the board so continue
     else: # its a tie
-      playing = False
-      print("\n" * 45)
-      draw_board(board)
-      print("It's a tie!")
+      playing = False # exit the main game loop
+      print("\n" * 45) # gives a clean screen
+      draw_board(board) # draws the final board
+      print("It's a tie!") # tell the player(s) it's a tie
       break # break out the loop
