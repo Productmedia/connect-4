@@ -1,0 +1,3 @@
+[submodule "board_utils"]
+	path = board_utils
+	url = https://github.com/Productmedia/board_utils
